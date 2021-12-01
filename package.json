@@ -8,7 +8,7 @@
   "license": "MIT",
   "files": [
     "dist",
-    "README.md",
+    "README.md"
   ],
   "scripts": {
     "clean": "rimraf dist",
