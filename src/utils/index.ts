@@ -1,5 +1,5 @@
 const { Buffer } = require('buffer/');
-import { REFRESH_INTERVAL_TIME } from '@/constants';
+import { REFRESH_INTERVAL_TIME } from '@/config';
 
 
 export function getTime(timeOffset?: number): number {

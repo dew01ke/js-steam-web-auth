@@ -1,41 +1,38 @@
-import { REFRESH_INTERVAL_TIME } from '@/constants';
 import { generateAuthCode } from '@/core';
 import { getCurrentCountdown } from '@/utils';
 import { SubscribeCallback, Unsubscribe } from '@/interfaces';
 
+let authCodeCallbacks = new Map();
 
-let callbacks = new Map();
-
-export function subscribe(identitySecret: string, callback: SubscribeCallback): Unsubscribe {
-  callbacks.set(identitySecret, callback);
+export function subscribeToAuthCode(identitySecret: string, callback: SubscribeCallback): Unsubscribe {
+  if (!authCodeCallbacks.has(identitySecret)) {
+    authCodeCallbacks.set(identitySecret, callback);
+  }
 
   callback({
     code: generateAuthCode(identitySecret, 0),
     countdown: getCurrentCountdown(),
+    createdAt: Date.now(),
   });
 
   return () => {
-    callbacks.delete(identitySecret);
+    authCodeCallbacks.delete(identitySecret);
   }
 }
 
 function notifyAll() {
-  for (const [identitySecret, callback] of callbacks) {
+  authCodeCallbacks.forEach((callback, identitySecret) => {
     callback({
       code: generateAuthCode(identitySecret, 0),
       countdown: getCurrentCountdown(),
     });
-  }
+  });
 }
 
 function runNotifications() {
   setTimeout(() => {
     notifyAll();
-
-    setInterval(() => {
-      notifyAll();
-    }, REFRESH_INTERVAL_TIME * 1000);
-  }, getCurrentCountdown() * 1000);
+  }, 1000);
 }
 
 runNotifications();
