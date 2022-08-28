@@ -9,10 +9,12 @@ export function subscribeToAuthCode(identitySecret: string, callback: SubscribeC
     authCodeCallbacks.set(identitySecret, callback);
   }
 
-  callback({
-    code: generateAuthCode(identitySecret, 0),
-    countdown: getCurrentCountdown(),
-    createdAt: Date.now(),
+  generateAuthCode(identitySecret, 0).then((code) => {
+    callback({
+      code,
+      time: getCurrentCountdown(),
+      createdAt: Date.now(),
+    });
   });
 
   return () => {
@@ -22,9 +24,11 @@ export function subscribeToAuthCode(identitySecret: string, callback: SubscribeC
 
 function notifyAll() {
   authCodeCallbacks.forEach((callback, identitySecret) => {
-    callback({
-      code: generateAuthCode(identitySecret, 0),
-      countdown: getCurrentCountdown(),
+    generateAuthCode(identitySecret, 0).then((code) => {
+      callback({
+        code,
+        time: getCurrentCountdown(),
+      });
     });
   });
 }
@@ -32,6 +36,7 @@ function notifyAll() {
 function runNotifications() {
   setTimeout(() => {
     notifyAll();
+    runNotifications();
   }, 1000);
 }
 

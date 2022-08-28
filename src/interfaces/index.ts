@@ -1,4 +1,4 @@
-export type SubscribePayload = { code: string; countdown: number; createdAt: number; };
+export type SubscribePayload = { code: string; time: number; createdAt: number; };
 
 export type SubscribeCallback = (payload: SubscribePayload) => void;
 
