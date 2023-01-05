@@ -1,6 +1,6 @@
 {
   "name": "js-steam-web-auth",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A simple library that allows you to get 2FA codes to authenticate to Steam using your Secret Key.",
   "author": "Andrey Volkov <me@andrey-volkov.ru>",
   "main": "dist/index.js",

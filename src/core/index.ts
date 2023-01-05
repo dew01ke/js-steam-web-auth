@@ -1,5 +1,5 @@
 import { createHMAC, createSHA1 } from 'hash-wasm';
-import { getTime } from '@/utils';
+import { getTime, warn } from '@/utils';
 import { REFRESH_INTERVAL_TIME } from '@/config';
 
 function stringToBytes(text): Uint8Array {
@@ -43,15 +43,21 @@ function extractCode(bytes): string {
 }
 
 export async function generateAuthCode(secret: string, timeOffset: number = 0): Promise<string> {
-  const currentTime = getTime(timeOffset);
-  const hmac = await createHMAC(createSHA1(), stringToBytes(atob(secret)));
-  const payload = Math.floor(currentTime / REFRESH_INTERVAL_TIME);
+  try {
+    const currentTime = getTime(timeOffset);
+    const hmac = await createHMAC(createSHA1(), stringToBytes(atob(secret)));
+    const payload = Math.floor(currentTime / REFRESH_INTERVAL_TIME);
 
-  const bytes = new Uint8Array(8);
-  bytes.set(new Uint8Array(numberToBytes(payload)), 4);
+    const bytes = new Uint8Array(8);
+    bytes.set(new Uint8Array(numberToBytes(payload)), 4);
 
-  hmac.init();
-  hmac.update(bytes);
+    hmac.init();
+    hmac.update(bytes);
 
-  return extractCode(hmac.digest('binary'));
+    return extractCode(hmac.digest('binary'));
+  } catch (error) {
+    warn('generateAuthCode', error);
+  }
+
+  return null;
 }

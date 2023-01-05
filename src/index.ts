@@ -1,19 +1,19 @@
 import { generateAuthCode } from '@/core';
 import { getCurrentCountdown } from '@/utils';
-import { SubscribeCallback, Unsubscribe } from '@/interfaces';
+import { Subscriber, Unsubscribe} from '@/interfaces';
 
-let authCodeCallbacks = new Map();
+let authCodeCallbacks = new Map<string, Subscriber>();
 
-export function subscribeToAuthCode(identitySecret: string, callback: SubscribeCallback): Unsubscribe {
+export function subscribeToAuthCode(identitySecret: string, subscriber: Subscriber): Unsubscribe {
   if (!authCodeCallbacks.has(identitySecret)) {
-    authCodeCallbacks.set(identitySecret, callback);
+    authCodeCallbacks.set(identitySecret, subscriber);
   }
 
   generateAuthCode(identitySecret, 0).then((code) => {
-    callback({
+    subscriber({
+      identitySecret,
       code,
-      time: getCurrentCountdown(),
-      createdAt: Date.now(),
+      time: getCurrentCountdown()
     });
   });
 
@@ -26,6 +26,7 @@ function notifyAll() {
   authCodeCallbacks.forEach((callback, identitySecret) => {
     generateAuthCode(identitySecret, 0).then((code) => {
       callback({
+        identitySecret,
         code,
         time: getCurrentCountdown(),
       });
